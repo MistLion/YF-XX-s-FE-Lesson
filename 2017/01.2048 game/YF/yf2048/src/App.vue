@@ -1,148 +1,181 @@
 <template>
-  <div id="app">
-    <header>
-
-    <h1>2048</h1>
-
-    <a href="javascript:void(0)" id="newgamebutton" v-on:click="generateOneNumber">New Game</a>
-
-    <p>score:<span id="score">0</span></p>
-
-  </header>
-    <div id="grid-container" style="width: 460px; height: 460px; padding: 20px; border-radius: 10px;">
-      <template v-for="x in 4">
-        <template v-for="y in 4">
-          <div class="grid-cell"  :style="{top: 20+(y-1)*120+'px', left: 20+(x-1)*120+'px'}"></div>
-        </template>
-      </template>
-     <template v-for="(arrayItem,arrayIndex) in numberArray">
-        <template v-for="(blockItem,blockIndex) in arrayItem">
-          <div class="number-cell"  :style="{top: 20+blockIndex*120+'px', left: 20+arrayIndex*120+'px',display:blockItem.value!=0?'':'none',backgroundColor:bgcolor[blockItem.value-1]}">{{number[blockItem.value-1]}}</div>
-        </template>
-      </template>
+    <div id="app" v-on:keyup.up="moveUp" v-on:keyup.down="moveDown" v-on:keyup.left="moveLeft" v-on:keyup.right="moveRight">
+        <header>
+            <h1>2048</h1>
+            <a href="javascript:void(0)" v-on:click="startNewGame"  id="newgamebutton">New Game</a>
+            <p>score:<span id="score">{{score}}</span></p>
+        </header>
+        <div id="grid-container" style="width: 460px; height: 460px; padding: 20px; border-radius: 10px;">
+            <template v-for="x in 4">
+                <template v-for="y in 4">
+                     <div class="grid-cell" :style="{top: 20+(y-1)*120+'px', left: 20+(x-1)*120+'px'}"></div>
+                </template>
+            </template>
+            <template v-for="(arrayItem,arrayIndex) in numberArray">
+                <template v-for="(blockItem,blockIndex) in arrayItem">
+                     <div class="number-cell" :style="{top: 20+blockIndex*120+'px', left: 20+arrayIndex*120+'px',display:blockItem.value!=0?'':'none',backgroundColor:bgcolor[blockItem.value-1]}">
+                         {{number[blockItem.value-1]}}
+                     </div>
+                </template>
+            </template>
+        </div>
     </div>
-  </div>
 </template>
 
 <script>
-export default {
-  name: 'app',
-  data () {
-    return {
-    bgcolor:[
-      'rgb(238, 228, 218)',
-      'rgb(237, 224, 200)',
-      'rgb(242, 177, 121)',
-      'rgb(245, 149, 99)',
-      'rgb(246, 126, 95)',
-      'rgb(246, 94, 59)',
-      'rgb(237, 207, 114)',
-      'rgb(237, 204, 97)',
-      'rgb(237, 177, 67)',
-      'rgb(197, 140,120)',
-      'rgb(195, 130,118)',
-      'rgb(188, 110,110)',
-      'rgb(177, 67,100)',
-    ],
-    number:[
-      2,4,8,16,32,64,128,256,512,1024,2048,4096,8192
-    ],
-    numberArray:[
-     [ {value:0},{value:0},{value:0},{value:0}],
-     [ {value:0},{value:0},{value:0},{value:0}],
-     [ {value:0},{value:0},{value:0},{value:0}],
-     [ {value:0},{value:0},{value:0},{value:0}]
-    ]
-    }
-  },
-  computed:{
-    canMoveLeft:function(){
-       for(var i= 0 ;i<4;i++) {
-        for (var j = 1; j < 4; j++) {
-            if(this.numberArray[i][j]!=0)
-                if(this.numberArray[i][j-1]==0||this.numberArray[i][j-1]==this.numberArray[i][j])
+    export default {
+        name: 'app',
+        data() {
+            return {
+                bgcolor: [
+                    'rgb(238, 228, 218)',
+                    'rgb(237, 224, 200)',
+                    'rgb(242, 177, 121)',
+                    'rgb(245, 149, 99)',
+                    'rgb(246, 126, 95)',
+                    'rgb(246, 94, 59)',
+                    'rgb(237, 207, 114)',
+                    'rgb(237, 204, 97)',
+                    'rgb(237, 177, 67)',
+                    'rgb(197, 140,120)',
+                    'rgb(195, 130,118)',
+                    'rgb(188, 110,110)',
+                    'rgb(177, 67,100)',
+                ],
+                number: [
+                    2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192
+                ],
+                numberArray: [
+                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
+                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
+                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
+                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }]
+                ],
+                score: 0
+            }
+        },
+        computed: {
+            canMoveLeft: function () {
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 1; j < 4; j++) {
+                        if (this.numberArray[i][j].value != 0)
+                            if (this.numberArray[i][j - 1].value == 0 || this.numberArray[i][j - 1].value == this.numberArray[i][j].value)
+                                return true;
+                    }
+                }
+                return false;
+            },
+            canMoveRight: function () {
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 2; j > -1; j--) {
+                        if (this.numberArray[i][j].value != 0)
+                            if (this.numberArray[i][j + 1].value == 0 || this.numberArray[i][j + 1].value == this.numberArray[i][j].value)
+                                return true;
+                    }
+                }
+                return false;
+            },
+            canMoveUp: function () {
+                for (var i = 1; i < 4; i++) {
+                    for (var j = 0; j < 4; j++) {
+                        if (this.numberArray[i][j].value != 0)
+                            if (this.numberArray[i - 1][j].value == 0 || this.numberArray[i - 1][j].value == this.numberArray[i][j].value)
+                                return true;
+                    }
+                }
+                return false;
+            },
+            canMoveDown: function () {
+                for (var i = 2; i > -1; i--) {
+                    for (var j = 0; j < 4; j++) {
+                        if (this.numberArray[i][j].value != 0)
+                            if (this.numberArray[i + 1][j].value == 0 || this.numberArray[i + 1][j].value == this.numberArray[i][j].value)
+                                return true;
+                    }
+                }
+                return false;
+            },
+            haveSpace: function () {
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 0; j < 4; j++) {
+                        if (this.numberArray[i][j].value == 0)
+                            return true;
+                    }
+                }
+                return false;
+            }
+        },
+        methods: {
+            generateOneNumber: function () {
+                if (!this.haveSpace) {
+                    return false;
+                }
+                var randx = parseInt(Math.floor(Math.random() * 4));
+                var randy = parseInt(Math.floor(Math.random() * 4));
+                var times = 0;
+                while (times < 50) {
+                    if (this.numberArray[randx][randy].value == 0)
+                        break;
+                    var randx = parseInt(Math.floor(Math.random() * 4));
+                    var randy = parseInt(Math.floor(Math.random() * 4));
+                    times++;
+                }
+                if (times == 50) {
+                    for (var i = 0; i < 4; i++) {
+                        for (var j = 0; j < 4; j++) {
+                            if (this.numberArray[i][j].value == 0) {
+                                randx = i;
+                                randy = j;
+                            }
+                        }
+                    }
+                }
+                var randNumber = Math.random() < 0.5 ? 1 : 2;
+                this.numberArray[randx][randy].value = randNumber;
+                console.log(this.numberArray);
                 return true;
+            },
+            moveUp:function(){
+            console.log('Up');
+            },
+            moveDown:function(){
+            console.log('Down');
+            },
+            moveLeft:function(){
+            console.log('Left');
+            },
+            moveRight:function(){
+            console.log('Right');
+            },
+            startNewGame:function(){
+                this.numberArray=[
+                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
+                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
+                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
+                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }]
+                ];
+                this.generateOneNumber();
+                this.generateOneNumber();
+            },
+            keyUp:function(e){
+　　 　 var currKey=0,e=e||event; 
+　　 　 currKey=e.keyCode||e.which||e.charCode; 
+　　 　switch(currKey)
+             {
+              case 38:this.moveUp();break;
+              case 39:this.moveRight();break;
+              case 40:this.moveDown();break;
+              case 37:this.moveLeft();break;
+              }
+            }
+        },
+        mounted: function () {
+            var vm = this;
+            vm.generateOneNumber();
+            vm.generateOneNumber();
+            document.onkeyup = vm.keyUp;
         }
     }
-    return false;
-    },
-    canMoveRight:function(){
-      for(var i= 0 ;i<4;i++) {
-        for (var j = 2;j>-1; j--) {
-            if(this.numberArray[i][j]!=0)
-                if(this.numberArray[i][j+1]==0||this.numberArray[i][j+1]==this.numberArray[i][j])
-                    return true;
-        }
-    }
-    return false;
-    },
-    canMoveUp:function(){
-    for(var i= 1 ;i<4;i++) {
-        for (var j = 0; j < 4; j++) {
-            if(this.numberArray[i][j]!=0)
-                if(this.numberArray[i-1][j]==0||this.numberArray[i-1][j]==this.numberArray[i][j])
-                    return true;
-        }
-    }
-    return false;
-    },
-    canMoveDown:function(){
-     for(var i= 2;i>-1;i--) {
-        for (var j = 0; j < 4; j++) {
-            if(this.numberArray[i][j]!=0)
-                if(this.numberArray[i+1][j]==0||this.numberArray[i+1][j]==this.numberArray[i][j])
-                    return true;
-        }
-    }
-    return false;
-    },
-    haveSpace:function(){
-    for(var i= 0 ;i<4;i++) {
-        for (var j = 0; j < 4; j++) {
-            if(this.numberArray[i][j].value==0)
-                return true;
-        }
-    }
-    return false;
-    }
-  },
-  methods:{
-    generateOneNumber:function(){
-    if(!this.haveSpace){
-        return false;
-    }
-    var randx=parseInt(Math.floor(Math.random()*4));
-    var randy=parseInt(Math.floor(Math.random()*4));
-    var times=0;
-    while (times<50){
-        if (this.numberArray[randx][randy].value==0)
-            break;
-        var randx=parseInt(Math.floor(Math.random()*4));
-        var randy=parseInt(Math.floor(Math.random()*4));
-        times++;
-    }
-    if(times==50){
-         for(var i=0;i<4;i++){
-             for(var j=0;j<4;j++){
-                 if(this.numberArray[i][j].value==0){
-                     randx=i;
-                     randy=j;
-                 }
-             }
-         }
-    }
-    var randNumber=Math.random()<0.5? 1 : 2;
-    this.numberArray[randx][randy].value=randNumber;
-    console.log(this.numberArray);
-    return true;
-    }
-  },
-  mounted: function () {
-  var vm = this;
-   vm.generateOneNumber();
-   vm.generateOneNumber();
-  }
-}
 </script>
 
 <style lang="scss">
@@ -210,5 +243,4 @@ header p {
     border-radius: 10px;
     position: relative;
 }
-
 </style>

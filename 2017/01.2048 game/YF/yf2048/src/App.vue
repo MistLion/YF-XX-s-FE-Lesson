@@ -2,24 +2,24 @@
     <div id="app" v-on:keyup.up="moveUp" v-on:keyup.down="moveDown" v-on:keyup.left="moveLeft" v-on:keyup.right="moveRight">
         <header>
             <h1>2048</h1>
-            <a href="javascript:void(0)" v-on:click="startNewGame"  id="newgamebutton">New Game</a>
+            <a href="javascript:void(0)" v-on:click="startNewGame" id="newgamebutton">New Game</a>
             <p>score:<span id="score">{{score}}</span></p>
         </header>
         <div id="grid-container" style="width: 460px; height: 460px; padding: 20px; border-radius: 10px;">
-            <template v-for="x in 4">
-                <template v-for="y in 4">
-                     <div class="grid-cell" :style="{top: 20+(y-1)*120+'px', left: 20+(x-1)*120+'px'}"></div>
-                </template>
-            </template>
-            <template v-for="(arrayItem,arrayIndex) in numberArray">
-                <template v-for="(blockItem,blockIndex) in arrayItem">
-                     <div class="number-cell" :style="{top: 20+blockIndex*120+'px', left: 20+arrayIndex*120+'px',display:blockItem.value!=0?'':'none',backgroundColor:bgcolor[blockItem.value-1]}">
-                         {{number[blockItem.value-1]}}
-                     </div>
-                </template>
-            </template>
+<template v-for="x in 4">
+    <template v-for="y in 4">
+        <div class="grid-cell" :style="{top: 20+(y-1)*120+'px', left: 20+(x-1)*120+'px'}"></div>
+    </template>
+</template>
+<template v-for="(arrayItem,arrayIndex) in numberArray">
+    <template v-for="(blockItem,blockIndex) in arrayItem">
+        <div class="number-cell" :style="{top: 20+arrayIndex*120+'px', left: 20+blockIndex*120+'px',display:blockItem.value!=0?'':'none',backgroundColor:bgcolor[blockItem.value-1]}">
+            {{number[blockItem.value-1]}}
         </div>
-    </div>
+    </template>
+</template>
+</div>
+</div>
 </template>
 
 <script>
@@ -50,6 +50,12 @@
                     [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
                     [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
                     [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }]
+                ],
+                hasConflicted: [
+                    [{ value: false }, { value: false }, { value: false }, { value: false }],
+                    [{ value: false }, { value: false }, { value: false }, { value: false }],
+                    [{ value: false }, { value: false }, { value: false }, { value: false }],
+                    [{ value: false }, { value: false }, { value: false }, { value: false }]
                 ],
                 score: 0
             }
@@ -132,41 +138,154 @@
                 }
                 var randNumber = Math.random() < 0.5 ? 1 : 2;
                 this.numberArray[randx][randy].value = randNumber;
-                console.log(this.numberArray);
                 return true;
             },
-            moveUp:function(){
-            console.log('Up');
+            noBlockHorizontal: function (row, col1, col2) {
+                for (var i = col1 + 1; i < col2; i++) {
+                    if (this.numberArray[row][i].value != 0) {
+                        return false;
+                    }
+                }
+                return true;
             },
-            moveDown:function(){
-            console.log('Down');
+            noBlockVertical: function (column, row1, row2) {
+                for (var i = row1 + 1; i < row2; i++) {
+                    if (this.numberArray[i][column].value != 0) {
+                        return false;
+                    }
+                }
+                return true;
             },
-            moveLeft:function(){
-            console.log('Left');
+            moveUp: function () {
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 1; j < 4; j++) {
+                        if (this.numberArray[j][i].value != 0) {
+                            for (var k = 0; k < j; k++) {
+                                if (this.numberArray[k][i].value == 0 && this.noBlockVertical(i, k, j)) {
+                                    this.numberArray[k][i].value = this.numberArray[j][i].value;
+                                    this.numberArray[j][i].value = 0;
+                                    break;
+                                }
+                                else if (this.numberArray[k][i].value == this.numberArray[j][i].value && this.noBlockVertical(i, k, j) && !this.hasConflicted[k][i].value) {
+                                    this.numberArray[k][i].value += 1;
+                                    this.numberArray[j][i].value = 0;
+                                    this.hasConflicted[k][i].value = true;
+                                    this.score = this.score + this.number[this.numberArray[k][i].value - 1];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             },
-            moveRight:function(){
-            console.log('Right');
+            moveDown: function () {
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 2; j > -1; j--) {
+                        if (this.numberArray[j][i].value != 0) {
+                            for (var k = 3; k > j; k--) {
+                                if (this.numberArray[k][i].value == 0 && this.noBlockVertical(i, k, j)) {
+                                    this.numberArray[k][i].value = this.numberArray[j][i].value;
+                                    this.numberArray[j][i].value = 0;
+                                    break;
+                                }
+                                else if (this.numberArray[k][i].value == this.numberArray[j][i].value && this.noBlockVertical(i, k, j) && !this.hasConflicted[k][i].value) {
+                                    this.numberArray[k][i].value += 1;
+                                    this.numberArray[j][i].value = 0;
+                                    this.hasConflicted[k][i].value = true;
+                                    this.score = this.score + this.number[this.numberArray[k][i].value - 1];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             },
-            startNewGame:function(){
-                this.numberArray=[
+            moveLeft: function () {
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 1; j < 4; j++) {
+                        if (this.numberArray[i][j].value != 0) {
+                            for (var k = 0; k < j; k++) {
+                                if (this.numberArray[i][k].value == 0 && this.noBlockHorizontal(i, k, j)) {
+                                    this.numberArray[i][k].value = this.numberArray[i][j].value;
+                                    this.numberArray[i][j].value = 0;
+                                    break;
+                                }
+                                else if (this.numberArray[i][k].value == this.numberArray[i][j].value && this.noBlockHorizontal(i, k, j) && !this.hasConflicted[i][k].value) {
+                                    this.numberArray[i][k].value += 1;
+                                    this.numberArray[i][j].value = 0;
+                                    this.hasConflicted[i][k].value = true;
+                                    this.score = this.score + this.number[this.numberArray[i][k].value - 1];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            moveRight: function () {
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 2; j > -1; j--) {
+                        if (this.numberArray[i][j].value != 0) {
+                            for (var k = 3; k > j; k--) {
+                                if (this.numberArray[i][k].value == 0 && this.noBlockHorizontal(i, j, k)) {
+                                    this.numberArray[i][k].value = this.numberArray[i][j].value;
+                                    this.numberArray[i][j].value = 0;
+                                    break;
+                                }
+                                else if (this.numberArray[i][k].value == this.numberArray[i][j].value && this.noBlockHorizontal(i, j, k) && !this.hasConflicted[i][k].value) {
+                                    this.numberArray[i][k].value += 1;
+                                    this.numberArray[i][j].value = 0;
+                                    this.hasConflicted[i][k].value = true;
+                                    this.score = this.score + this.number[this.numberArray[i][k].value - 1];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            startNewGame: function () {
+                this.numberArray = [
                     [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
                     [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
                     [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
                     [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }]
                 ];
+                this.hasConflicted = [
+                    [{ value: false }, { value: false }, { value: false }, { value: false }],
+                    [{ value: false }, { value: false }, { value: false }, { value: false }],
+                    [{ value: false }, { value: false }, { value: false }, { value: false }],
+                    [{ value: false }, { value: false }, { value: false }, { value: false }]
+                ];
                 this.generateOneNumber();
                 this.generateOneNumber();
+                this.score = 0;
             },
-            keyUp:function(e){
-　　 　 var currKey=0,e=e||event; 
-　　 　 currKey=e.keyCode||e.which||e.charCode; 
-　　 　switch(currKey)
-             {
-              case 38:this.moveUp();break;
-              case 39:this.moveRight();break;
-              case 40:this.moveDown();break;
-              case 37:this.moveLeft();break;
-              }
+            keyUp: function (e) {
+                var currKey = 0, e = e || event;
+                currKey = e.keyCode || e.which || e.charCode;
+                switch (currKey) {
+                    case 38:
+                        if (this.canMoveUp) {
+                            this.moveUp();
+                        }
+                        break;
+                    case 39:
+                        if (this.canMoveRight) {
+                            this.moveRight();
+                        }
+                        break;
+                    case 40:
+                        if (this.canMoveDown) {
+                            this.moveDown();
+                        }
+                        break;
+                    case 37:
+                        if (this.canMoveLeft) {
+                            this.moveLeft();
+                        }
+                        break;
+                }
             }
         },
         mounted: function () {

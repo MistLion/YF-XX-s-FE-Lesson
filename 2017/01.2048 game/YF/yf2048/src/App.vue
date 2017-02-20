@@ -1,5 +1,5 @@
 <template>
-    <div id="app" v-on:keyup.up="moveUp" v-on:keyup.down="moveDown" v-on:keyup.left="moveLeft" v-on:keyup.right="moveRight">
+    <div id="app">
         <header>
             <h1>2048</h1>
             <a href="javascript:void(0)" v-on:click="startNewGame" id="newgamebutton">New Game</a>
@@ -11,9 +11,9 @@
         <div class="grid-cell" :style="{top: 20+(y-1)*120+'px', left: 20+(x-1)*120+'px'}"></div>
     </template>
 </template>
-<template v-for="(arrayItem,arrayIndex) in numberArray">
-    <template v-for="(blockItem,blockIndex) in arrayItem">
-        <div class="number-cell" :style="{top: 20+arrayIndex*120+'px', left: 20+blockIndex*120+'px',display:blockItem.value!=0?'':'none',backgroundColor:bgcolor[blockItem.value-1]}">
+<template v-for="arrayItem in numberArray">
+    <template v-for="blockItem in arrayItem">
+        <div class="number-cell" :style="{top: 20+blockItem.y*120+'px', left: 20+blockItem.x*120+'px',display:blockItem.value!=0?'':'none',backgroundColor:bgcolor[blockItem.value-1]}">
             {{number[blockItem.value-1]}}
         </div>
     </template>
@@ -46,10 +46,10 @@
                     2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192
                 ],
                 numberArray: [
-                    [{ value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }],
-                    [{ value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }],
-                    [{ value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }],
-                    [{ value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }]
+                    [{ value: 0, conflicted: false, x: 0, y: 0 }, { value: 0, conflicted: false, x: 1, y: 0 }, { value: 0, conflicted: false, x: 2, y: 0 }, { value: 0, conflicted: false, x: 3, y: 0 }],
+                    [{ value: 0, conflicted: false, x: 0, y: 1 }, { value: 0, conflicted: false, x: 1, y: 1 }, { value: 0, conflicted: false, x: 2, y: 1 }, { value: 0, conflicted: false, x: 3, y: 1 }],
+                    [{ value: 0, conflicted: false, x: 0, y: 2 }, { value: 0, conflicted: false, x: 1, y: 2 }, { value: 0, conflicted: false, x: 2, y: 2 }, { value: 0, conflicted: false, x: 3, y: 2 }],
+                    [{ value: 0, conflicted: false, x: 0, y: 3 }, { value: 0, conflicted: false, x: 1, y: 3 }, { value: 0, conflicted: false, x: 2, y: 3 }, { value: 0, conflicted: false, x: 3, y: 3 }]
                 ],
                 score: 0
             }
@@ -107,7 +107,6 @@
         },
         methods: {
             generateOneNumber: function () {
-                console.log(this.haveSpace);
                 if (!this.haveSpace) {
                     return false;
                 }
@@ -133,7 +132,6 @@
                 }
                 var randNumber = Math.random() < 0.5 ? 1 : 2;
                 this.numberArray[randx][randy].value = randNumber;
-                return true;
             },
             noBlockHorizontal: function (row, col1, col2) {
                 for (var i = col1 + 1; i < col2; i++) {
@@ -166,6 +164,7 @@
                                     this.numberArray[j][i].value = 0;
                                     this.numberArray[k][i].conflicted = true;
                                     this.score = this.score + this.number[this.numberArray[k][i].value - 1];
+                                    this.releaseBlock();
                                     break;
                                 }
                             }
@@ -188,6 +187,7 @@
                                     this.numberArray[j][i].value = 0;
                                     this.numberArray[k][i].conflicted = true;
                                     this.score = this.score + this.number[this.numberArray[k][i].value - 1];
+                                    this.releaseBlock();
                                     break;
                                 }
                             }
@@ -210,6 +210,7 @@
                                     this.numberArray[i][j].value = 0;
                                     this.numberArray[i][k].conflicted = true;
                                     this.score = this.score + this.number[this.numberArray[i][k].value - 1];
+                                    this.releaseBlock();
                                     break;
                                 }
                             }
@@ -223,19 +224,45 @@
                         if (this.numberArray[i][j].value != 0) {
                             for (var k = 3; k > j; k--) {
                                 if (this.numberArray[i][k].value == 0 && this.noBlockHorizontal(i, j, k)) {
+                                    this.showAnimate(j, i, k, i);
+                                    setTimeout(200);
                                     this.numberArray[i][k].value = this.numberArray[i][j].value;
                                     this.numberArray[i][j].value = 0;
                                     break;
                                 }
                                 else if (this.numberArray[i][k].value == this.numberArray[i][j].value && this.noBlockHorizontal(i, j, k) && !this.numberArray[i][k].conflicted) {
+                                    this.showAnimate(j, i, k, i)
+                                    setTimeout(200);
                                     this.numberArray[i][k].value += 1;
                                     this.numberArray[i][j].value = 0;
                                     this.numberArray[i][k].conflicted = true;
                                     this.score = this.score + this.number[this.numberArray[i][k].value - 1];
+                                    this.releaseBlock();
                                     break;
                                 }
                             }
                         }
+                    }
+                }
+            },
+            showAnimate: function (fromx, fromy, tox, toy) {
+                var i = 1;
+                var vm = this;
+                var intervalx = (tox - fromx) / 20;
+                var intervaly = (toy - fromy) / 20;
+                var move = setInterval(function () {
+                    if (i >= 20) {
+                        clearInterval(move);
+                    }
+                    vm.numberArray[fromx][fromy].x += intervalx;
+                    vm.numberArray[fromx][fromy].y += intervaly;
+                    i++;
+                }, 10);
+            },
+            releaseBlock: function () {
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        this.numberArray[i][j].conflicted = false;
                     }
                 }
             },
@@ -257,25 +284,29 @@
                     case 38:
                         if (this.canMoveUp) {
                             this.moveUp();
+                            this.generateOneNumber();
                         }
                         break;
                     case 39:
                         if (this.canMoveRight) {
                             this.moveRight();
+                            this.generateOneNumber();
                         }
                         break;
                     case 40:
                         if (this.canMoveDown) {
                             this.moveDown();
+                            this.generateOneNumber();
                         }
                         break;
                     case 37:
                         if (this.canMoveLeft) {
                             this.moveLeft();
+                            this.generateOneNumber();
                         }
                         break;
                 }
-                this.generateOneNumber();
+
             }
         },
         mounted: function () {

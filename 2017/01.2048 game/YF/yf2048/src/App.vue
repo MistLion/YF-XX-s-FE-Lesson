@@ -46,16 +46,10 @@
                     2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192
                 ],
                 numberArray: [
-                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
-                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
-                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
-                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }]
-                ],
-                hasConflicted: [
-                    [{ value: false }, { value: false }, { value: false }, { value: false }],
-                    [{ value: false }, { value: false }, { value: false }, { value: false }],
-                    [{ value: false }, { value: false }, { value: false }, { value: false }],
-                    [{ value: false }, { value: false }, { value: false }, { value: false }]
+                    [{ value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }],
+                    [{ value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }],
+                    [{ value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }],
+                    [{ value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }, { value: 0, conflicted: false }]
                 ],
                 score: 0
             }
@@ -113,6 +107,7 @@
         },
         methods: {
             generateOneNumber: function () {
+                console.log(this.haveSpace);
                 if (!this.haveSpace) {
                     return false;
                 }
@@ -166,10 +161,10 @@
                                     this.numberArray[j][i].value = 0;
                                     break;
                                 }
-                                else if (this.numberArray[k][i].value == this.numberArray[j][i].value && this.noBlockVertical(i, k, j) && !this.hasConflicted[k][i].value) {
+                                else if (this.numberArray[k][i].value == this.numberArray[j][i].value && this.noBlockVertical(i, k, j) && !this.numberArray[k][i].conflicted) {
                                     this.numberArray[k][i].value += 1;
                                     this.numberArray[j][i].value = 0;
-                                    this.hasConflicted[k][i].value = true;
+                                    this.numberArray[k][i].conflicted = true;
                                     this.score = this.score + this.number[this.numberArray[k][i].value - 1];
                                     break;
                                 }
@@ -188,10 +183,10 @@
                                     this.numberArray[j][i].value = 0;
                                     break;
                                 }
-                                else if (this.numberArray[k][i].value == this.numberArray[j][i].value && this.noBlockVertical(i, k, j) && !this.hasConflicted[k][i].value) {
+                                else if (this.numberArray[k][i].value == this.numberArray[j][i].value && this.noBlockVertical(i, k, j) && !this.numberArray[k][i].conflicted) {
                                     this.numberArray[k][i].value += 1;
                                     this.numberArray[j][i].value = 0;
-                                    this.hasConflicted[k][i].value = true;
+                                    this.numberArray[k][i].conflicted = true;
                                     this.score = this.score + this.number[this.numberArray[k][i].value - 1];
                                     break;
                                 }
@@ -210,10 +205,10 @@
                                     this.numberArray[i][j].value = 0;
                                     break;
                                 }
-                                else if (this.numberArray[i][k].value == this.numberArray[i][j].value && this.noBlockHorizontal(i, k, j) && !this.hasConflicted[i][k].value) {
+                                else if (this.numberArray[i][k].value == this.numberArray[i][j].value && this.noBlockHorizontal(i, k, j) && !this.numberArray[i][k].conflicted) {
                                     this.numberArray[i][k].value += 1;
                                     this.numberArray[i][j].value = 0;
-                                    this.hasConflicted[i][k].value = true;
+                                    this.numberArray[i][k].conflicted = true;
                                     this.score = this.score + this.number[this.numberArray[i][k].value - 1];
                                     break;
                                 }
@@ -232,10 +227,10 @@
                                     this.numberArray[i][j].value = 0;
                                     break;
                                 }
-                                else if (this.numberArray[i][k].value == this.numberArray[i][j].value && this.noBlockHorizontal(i, j, k) && !this.hasConflicted[i][k].value) {
+                                else if (this.numberArray[i][k].value == this.numberArray[i][j].value && this.noBlockHorizontal(i, j, k) && !this.numberArray[i][k].conflicted) {
                                     this.numberArray[i][k].value += 1;
                                     this.numberArray[i][j].value = 0;
-                                    this.hasConflicted[i][k].value = true;
+                                    this.numberArray[i][k].conflicted = true;
                                     this.score = this.score + this.number[this.numberArray[i][k].value - 1];
                                     break;
                                 }
@@ -245,18 +240,12 @@
                 }
             },
             startNewGame: function () {
-                this.numberArray = [
-                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
-                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
-                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }],
-                    [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }]
-                ];
-                this.hasConflicted = [
-                    [{ value: false }, { value: false }, { value: false }, { value: false }],
-                    [{ value: false }, { value: false }, { value: false }, { value: false }],
-                    [{ value: false }, { value: false }, { value: false }, { value: false }],
-                    [{ value: false }, { value: false }, { value: false }, { value: false }]
-                ];
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        this.numberArray[i][j].value = 0;
+                        this.numberArray[i][j].conflicted = false;
+                    }
+                }
                 this.generateOneNumber();
                 this.generateOneNumber();
                 this.score = 0;
@@ -286,6 +275,7 @@
                         }
                         break;
                 }
+                this.generateOneNumber();
             }
         },
         mounted: function () {

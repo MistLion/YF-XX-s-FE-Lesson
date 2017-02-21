@@ -2,23 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>2048</title>
-    <link rel="stylesheet" type="text/css" href="2048.css">
+    <meta name="viewport"
+          content="width=device-width,height=device-height,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 
-    <script type="text/javascript" src="jquery-2.1.1.js"></script>
-    <!--底层支撑-->
+    <title>2048</title>
+    <link rel="stylesheet" type="text/css" href="2048.css"/>
+
+    <!--<script type="text/javascript" src="http://libs.baidu.com/jquery/1.9.0/jquery.min.js"></script>-->
+    <script src="jquery-2.1.1.js"></script>
     <script type="text/javascript" src="support2048.js"></script>
-    <!--动画效果-->
-    <script type="text/javascript" src="showanimation2048.js"></script>
-    <!--主逻辑-->
+    <script type="text/javascript" src="showAnimation2048.js"></script>
     <script type="text/javascript" src="main2048.js"></script>
+
 </head>
 <body>
+
+<!-- 绘制标题 -->
 <header>
-    <h1>2048</h1>
-    <a href="javascript:newgame();" id="newgamebutton">New Game</a>
-    <p>Score:<span id="score">0</span></p>
+    <h1>2048文字版</h1>
+    <div id="button">
+        <a href="javascript:newgame();" id="newgamebutton">New Game</a>
+        <a href="javascript:gameover();" id="stopgamebutton">Stop Game</a>
+    </div>
+    <p>score:<span id="score">0</span></p>
 </header>
+
+<!-- 绘制棋盘格 -->
 <div id="grid-container">
     <div class="grid-cell" id="grid-cell-0-0"></div>
     <div class="grid-cell" id="grid-cell-0-1"></div>
